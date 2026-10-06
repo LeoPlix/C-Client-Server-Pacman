@@ -24,10 +24,25 @@ SERVER_OBJS := $(patsubst $(SERVER_DIR)/%.c,$(OBJ_DIR)/server_%.o,$(filter $(SER
                $(patsubst $(CLIENT_DIR)/%.c,$(OBJ_DIR)/client_%.o,$(filter $(CLIENT_DIR)/%,$(SERVER_SRCS)))
 COMMON_OBJS := $(patsubst $(COMMON_DIR)/%.c,$(OBJ_DIR)/common_%.o,$(COMMON_SRCS))
 
+# Fallback include paths for ncurses headers if not in standard system include
+NCURSES_INC := $(shell find /var/lib/flatpak/runtime/ -name ncurses.h 2>/dev/null | head -n 1 | xargs -r dirname 2>/dev/null)
+NCURSES_DLL_INC := $(shell find /var/lib/flatpak/runtime/ -name ncurses_dll.h 2>/dev/null | head -n 1 | xargs -r dirname 2>/dev/null)
+
+NCURSES_CFLAGS :=
+ifneq ($(NCURSES_INC),)
+  NCURSES_CFLAGS += -I$(NCURSES_INC)
+endif
+ifneq ($(NCURSES_DLL_INC),)
+  NCURSES_CFLAGS += -I$(NCURSES_DLL_INC)
+endif
+
+# Fallback libs for ncurses
+NCURSES_LIBS := $(shell if [ -f /usr/lib64/libncurses.so ] || [ -f /usr/lib/libncurses.so ]; then echo "-lncurses"; else echo "-l:libncurses.so.6 -l:libtinfo.so.6"; fi)
+
 # Flags
 CC := gcc
-CFLAGS := -g -Wall -Wextra -Werror -std=c17 -D_POSIX_C_SOURCE=200809L -I$(INCLUDE_DIR) -fsanitize=thread
-LDFLAGS := -lncurses -fsanitize=thread
+CFLAGS := -g -Wall -Wextra -Werror -std=c17 -D_POSIX_C_SOURCE=200809L -I$(INCLUDE_DIR) $(NCURSES_CFLAGS)
+LDFLAGS := $(NCURSES_LIBS) -pthread
 
 # Alvo padrão (executado com apenas 'make')
 .DEFAULT_GOAL := all

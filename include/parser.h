@@ -2,11 +2,12 @@
 #define PARSER_H
 
 #include "board.h"
+#include "debug.h"
+
 #define MAX_COMMAND_LENGTH 256
 
-int read_line(int fd, char* buffer);
-int read_level(board_t* board, char* filename, char* dirname);
-int read_pacman(board_t* board, int points);
-int read_ghosts(board_t* board);
+int parse_pacman_ghost_file(const char* filename, command_t* moves, int* n_moves, int* passo);
+
+int parse_level_file(board_t* board, const char* level_dir);
 
 #endif

@@ -1,6 +1,7 @@
 #include "board.h"
 #include "display.h"
 #include "server.h"
+#include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
